@@ -1,0 +1,37 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+.factorypath
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+*.class
+*.jar
+*.war
+
+# Logs
+*.log
+
+# Temp
+*.tmp
+*.bak
+*~
+
+# JDK
+.java-version
+
+# Node (for future use)
+node_modules/
