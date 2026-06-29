@@ -1,0 +1,18 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: sample-gateway
+
+service-a:
+  url: http://localhost:8081
+
+uok:
+  service:
+    name: sample-gateway
+  biz:
+    domain: iot-home
+  team:
+    name: backend-team
+  env: test

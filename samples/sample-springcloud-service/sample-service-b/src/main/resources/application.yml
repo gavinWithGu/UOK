@@ -1,0 +1,15 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: sample-service-b
+
+uok:
+  service:
+    name: sample-service-b
+  biz:
+    domain: iot-home
+  team:
+    name: backend-team
+  env: test

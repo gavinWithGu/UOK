@@ -1,0 +1,18 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: sample-service-a
+
+service-b:
+  url: http://localhost:8082
+
+uok:
+  service:
+    name: sample-service-a
+  biz:
+    domain: iot-home
+  team:
+    name: backend-team
+  env: test

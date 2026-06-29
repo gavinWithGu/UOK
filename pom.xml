@@ -16,6 +16,7 @@
         <module>uok-common</module>
         <module>uok-agent</module>
         <module>uok-lambda-starter</module>
+        <module>samples/sample-springcloud-service</module>
     </modules>
 
     <properties>
