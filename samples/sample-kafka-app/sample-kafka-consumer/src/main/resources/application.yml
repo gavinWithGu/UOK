@@ -1,0 +1,19 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: sample-kafka-consumer
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: sample-consumer-group
+      auto-offset-reset: earliest
+
+kafka:
+  topic: test-topic
+
+uok:
+  service:
+    name: sample-kafka-consumer
+  env: test

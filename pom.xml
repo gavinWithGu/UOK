@@ -17,6 +17,8 @@
         <module>uok-agent</module>
         <module>uok-lambda-starter</module>
         <module>samples/sample-springcloud-service</module>
+        <module>samples/sample-kafka-app</module>
+        <module>samples/sample-lambda-function</module>
     </modules>
 
     <properties>
