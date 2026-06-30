@@ -1,5 +1,7 @@
 package com.bosch.iot.uok.lambda;
 
+import com.amazonaws.services.lambda.runtime.events.KinesisEvent;
+import com.amazonaws.services.lambda.runtime.events.KafkaEvent;
 import com.bosch.iot.uok.common.context.TraceContext;
 import com.bosch.iot.uok.lambda.context.LambdaContextHolder;
 import org.junit.jupiter.api.AfterEach;
@@ -33,6 +35,14 @@ class LambdaTracingInitializerTest {
     @DisplayName("Should initialize successfully")
     void shouldInitialize() {
         LambdaTracingInitializer.initialize();
+        assertThat(LambdaTracingInitializer.isInitialized()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Should not double-initialize")
+    void shouldNotDoubleInitialize() {
+        LambdaTracingInitializer.initialize();
+        LambdaTracingInitializer.initialize(); // second call should be no-op
         assertThat(LambdaTracingInitializer.isInitialized()).isTrue();
     }
 
@@ -85,12 +95,16 @@ class LambdaTracingInitializerTest {
 
         assertThat(LambdaContextHolder.isSet()).isFalse();
         assertThat(MDC.get("traceId")).isNull();
+        assertThat(MDC.get("spanId")).isNull();
+        assertThat(MDC.get("serviceName")).isNull();
+        assertThat(MDC.get("env")).isNull();
+        assertThat(MDC.get("bizDomain")).isNull();
+        assertThat(MDC.get("teamName")).isNull();
     }
 
     @Test
     @DisplayName("Should auto-initialize on onLambdaEvent if not explicitly initialized")
     void shouldAutoInitialize() {
-        // Don't call initialize() first
         TraceContext context = LambdaTracingInitializer.onLambdaEvent(null);
 
         assertThat(context).isNotNull();
@@ -113,11 +127,17 @@ class LambdaTracingInitializerTest {
     }
 
     @Test
+    @DisplayName("Should get OpenTelemetry instance after initialization")
+    void shouldGetOpenTelemetry() {
+        LambdaTracingInitializer.initialize();
+        assertThat(LambdaTracingInitializer.getOpenTelemetry()).isNotNull();
+    }
+
+    @Test
     @DisplayName("Should handle unknown event type gracefully")
     void shouldHandleUnknownEventType() {
         LambdaTracingInitializer.initialize();
 
-        // Pass a String which is not a Kinesis or Kafka event
         TraceContext context = LambdaTracingInitializer.onLambdaEvent("some-string-event");
 
         assertThat(context).isNotNull();
@@ -130,7 +150,6 @@ class LambdaTracingInitializerTest {
     void shouldExtractFromKinesisHeaders() {
         LambdaTracingInitializer.initialize();
 
-        // Use the adapter directly
         Map<String, String> headers = new HashMap<>();
         headers.put("traceparent", "00-0123456789abcdef0123456789abcdef-0123456789abcdef-01");
 
@@ -153,5 +172,84 @@ class LambdaTracingInitializerTest {
 
         assertThat(context).isNotNull();
         assertThat(context.getTraceId()).isEqualTo("0123456789abcdef0123456789abcdef");
+    }
+
+    @Test
+    @DisplayName("Should handle Kinesis-like event via onLambdaEvent")
+    void shouldHandleKinesisLikeEvent() {
+        LambdaTracingInitializer.initialize();
+
+        // Use a real KinesisEvent class to trigger the isKinesisEvent branch
+        KinesisEvent kinesisEvent = new KinesisEvent();
+        TraceContext context = LambdaTracingInitializer.onLambdaEvent(kinesisEvent);
+
+        assertThat(context).isNotNull();
+        assertThat(context.getTraceId()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Should handle Kafka-like event via onLambdaEvent")
+    void shouldHandleKafkaLikeEvent() {
+        LambdaTracingInitializer.initialize();
+
+        // Use a real KafkaEvent class to trigger the isKafkaEvent branch
+        KafkaEvent kafkaEvent = new KafkaEvent();
+        TraceContext context = LambdaTracingInitializer.onLambdaEvent(kafkaEvent);
+
+        assertThat(context).isNotNull();
+        assertThat(context.getTraceId()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Should propagate context fields from config")
+    void shouldPropagateContextFieldsFromConfig() {
+        LambdaTracingInitializer.initialize();
+
+        TraceContext context = LambdaTracingInitializer.onLambdaEvent(null);
+
+        assertThat(context.getServiceName()).isNotNull();
+        assertThat(context.getEnv()).isNotNull();
+        assertThat(context.getBizDomain()).isNotNull();
+        assertThat(context.getTeamName()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Should mark root context as sampled")
+    void shouldMarkRootContextAsSampled() {
+        LambdaTracingInitializer.initialize();
+
+        TraceContext context = LambdaTracingInitializer.onLambdaEvent(null);
+
+        assertThat(context.isSampled()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Should handle multiple sequential events")
+    void shouldHandleMultipleSequentialEvents() {
+        LambdaTracingInitializer.initialize();
+
+        TraceContext ctx1 = LambdaTracingInitializer.onLambdaEvent(null);
+        String traceId1 = ctx1.getTraceId();
+
+        LambdaTracingInitializer.onLambdaComplete();
+        assertThat(LambdaContextHolder.isSet()).isFalse();
+
+        TraceContext ctx2 = LambdaTracingInitializer.onLambdaEvent(null);
+        String traceId2 = ctx2.getTraceId();
+
+        // Each event should get a unique trace ID
+        assertThat(traceId2).isNotEqualTo(traceId1);
+    }
+
+    @Test
+    @DisplayName("onLambdaComplete should be idempotent")
+    void onLambdaCompleteShouldBeIdempotent() {
+        LambdaTracingInitializer.initialize();
+        LambdaTracingInitializer.onLambdaEvent(null);
+
+        LambdaTracingInitializer.onLambdaComplete();
+        LambdaTracingInitializer.onLambdaComplete(); // second call should not throw
+
+        assertThat(LambdaContextHolder.isSet()).isFalse();
     }
 }
