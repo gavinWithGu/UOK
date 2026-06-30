@@ -1,0 +1,58 @@
+# ==================== OpenSearch Index Template for UOK ====================
+# Version: 1.0.0
+# Description: Pre-defined index template with field mappings optimized for
+#              UOK trace log queries and document-level security (DLS)
+#
+# Usage:
+#   curl -X PUT "https://<OPENSEARCH_HOST>:9200/_index_template/uok-trace" \
+#     -H "Content-Type: application/json" \
+#     -d @opensearch-index-template.json
+# ========================================================================
+
+{
+  "index_patterns": ["uok-trace-*"],
+  "priority": 100,
+  "template": {
+    "settings": {
+      "index": {
+        "number_of_shards": 3,
+        "number_of_replicas": 1,
+        "refresh_interval": "5s",
+        "analysis": {
+          "analyzer": {
+            "uok_message_analyzer": {
+              "type": "custom",
+              "tokenizer": "standard",
+              "filter": ["lowercase", "trim"]
+            }
+          }
+        }
+      }
+    },
+    "mappings": {
+      "dynamic": "strict",
+      "properties": {
+        "timestamp":      { "type": "date", "format": "strict_date_optional_time||epoch_millis" },
+        "level":          { "type": "keyword" },
+        "traceId":        { "type": "keyword" },
+        "spanId":         { "type": "keyword" },
+        "parentSpanId":   { "type": "keyword" },
+        "serviceName":    { "type": "keyword" },
+        "bizDomain":      { "type": "keyword" },
+        "teamName":       { "type": "keyword" },
+        "env":            { "type": "keyword" },
+        "region":         { "type": "keyword" },
+        "thread":         { "type": "keyword" },
+        "logger":         { "type": "keyword" },
+        "message":        { "type": "text", "analyzer": "uok_message_analyzer" },
+        "deviceId":       { "type": "keyword" },
+        "userId":         { "type": "keyword" },
+        "error":          { "type": "boolean" },
+        "duration_ms":    { "type": "long" },
+        "log_type":       { "type": "keyword" },
+        "service_name":   { "type": "keyword" },
+        "tags":           { "type": "keyword" }
+      }
+    }
+  }
+}

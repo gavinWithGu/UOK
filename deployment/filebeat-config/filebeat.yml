@@ -1,0 +1,115 @@
+# ==================== Filebeat Configuration for UOK ====================
+# Version: 1.0.0
+# Description: Standard Filebeat config template for UOK log collection
+#              Parses JSON-structured logs and ships to OpenSearch
+#
+# Usage:
+#   1. Copy this file to /etc/filebeat/filebeat.yml
+#   2. Replace placeholders (<...>) with your environment values
+#   3. Run: filebeat test config && filebeat test output
+#   4. Start: systemctl start filebeat
+# ========================================================================
+
+# --- Filebeat Inputs ---
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      # UOK agent logs - adjust path to your application log directory
+      - /var/log/apps/*/uok-app.log
+      - /var/log/apps/*/uok-app.json.log
+    json.keys_under_root: true
+    json.add_error_key: true
+    json.message_key: message
+    # Tag for OpenSearch index routing
+    tags: ["uok-trace"]
+    fields:
+      log_type: uok_trace
+    fields_under_root: true
+    # Multiline handling for stack traces
+    multiline.type: pattern
+    multiline.pattern: '^\s+(at|\.\.\.)|^Caused by:'
+    multiline.negate: false
+    multiline.match: after
+
+  # Optional: Collect Lambda CloudWatch logs (via S3 export)
+  - type: log
+    enabled: false
+    paths:
+      - /var/log/lambda/uok-lambda-export/*.log
+    json.keys_under_root: true
+    json.add_error_key: true
+    tags: ["uok-lambda"]
+    fields:
+      log_type: uok_lambda_trace
+    fields_under_root: true
+
+# --- Processors ---
+processors:
+  # Extract service name from log path for index routing
+  - dissect:
+      tokenizer: "/var/log/apps/%{service_name}/uok-app.log"
+      field: "log.file.path"
+      target_prefix: "dissect"
+      when:
+        contains:
+          log.file.path: "/var/log/apps/"
+
+  # Add environment metadata
+  - add_fields:
+      target: ''
+      fields:
+        env: ${ENV:production}
+        region: ${AWS_REGION:eu-central-1}
+
+  # Drop internal Filebeat fields to reduce index size
+  - drop_fields:
+      fields: ["agent", "ecs", "input", "log.offset"]
+      ignore_missing: true
+
+  # Ensure traceId/spanId are indexed as keyword for fast lookup
+  - convert:
+      fields:
+        - {from: "traceId", to: "traceId", type: "keyword"}
+        - {from: "spanId", to: "spanId", type: "keyword"}
+        - {from: "parentSpanId", to: "parentSpanId", type: "keyword"}
+        - {from: "serviceName", to: "serviceName", type: "keyword"}
+        - {from: "bizDomain", to: "bizDomain", type: "keyword"}
+        - {from: "teamName", to: "teamName", type: "keyword"}
+      ignore_missing: true
+      fail_on_error: false
+
+# --- OpenSearch Output ---
+output.opensearch:
+  hosts: ["<OPENSEARCH_HOST>:9200"]
+  username: "${OPENSEARCH_USERNAME:filebeat_internal}"
+  password: "${OPENSEARCH_PASSWORD:}"
+  # Index pattern: uok-trace-<service>-YYYY.MM.dd
+  index: "uok-trace-%{[service_name]}-%{+yyyy.MM.dd}"
+
+# --- Index Lifecycle Management ---
+setup.ilm.enabled: false
+
+# --- Index Template ---
+setup.template:
+  name: "uok-trace"
+  pattern: "uok-trace-*"
+  enabled: true
+  settings:
+    index:
+      number_of_shards: 3
+      number_of_replicas: 1
+      refresh_interval: "5s"
+
+# --- Logging ---
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat-uok
+  keepfiles: 7
+  permissions: 0644
+
+# --- Path Configuration ---
+path.data: /var/lib/filebeat-uok
+path.logs: /var/log/filebeat
