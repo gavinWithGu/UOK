@@ -19,6 +19,8 @@
         <module>samples/sample-springcloud-service</module>
         <module>samples/sample-kafka-app</module>
         <module>samples/sample-lambda-function</module>
+        <module>test-suite/integration-test</module>
+        <module>test-suite/performance-test</module>
     </modules>
 
     <properties>
