@@ -33,5 +33,8 @@ Thumbs.db
 # JDK
 .java-version
 
+# Maven Shade
+dependency-reduced-pom.xml
+
 # Node (for future use)
 node_modules/
