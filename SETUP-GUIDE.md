@@ -19,7 +19,7 @@ brew install openjdk@17
 # https://adoptium.net/temurin/releases/?version=17
 ```
 
-### 1.2 安装 Maven 3.9+
+### 1.2 安装 Maven 3.8.7+
 
 ```bash
 # Ubuntu/Debian:
@@ -31,7 +31,7 @@ brew install maven
 # 手动安装:
 # https://maven.apache.org/download.cgi
 # 下载后解压并加入 PATH:
-export MAVEN_HOME=/path/to/apache-maven-3.9.6
+export MAVEN_HOME=/path/to/apache-maven-3.9.9
 export PATH=$MAVEN_HOME/bin:$PATH
 ```
 
@@ -49,7 +49,7 @@ brew install git
 
 ```bash
 java -version    # 预期: openjdk version "17.x.x"
-mvn -version     # 预期: Apache Maven 3.9.x
+mvn -version     # 预期: Apache Maven 3.8.7.x
 git --version    # 预期: git version 2.x
 ```
 

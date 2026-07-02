@@ -7,7 +7,7 @@
 | Requirement | Version |
 |---|---|
 | JDK | 17 or 21 (OpenJDK / Temurin) |
-| Maven | 3.9+ |
+| Maven | 3.8.7+ |
 | Application | Spring Boot 3.2.x (recommended) or any Java servlet app |
 
 ## 2. Option A: Java Agent (Servlet / Spring Boot Applications)

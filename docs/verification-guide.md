@@ -9,7 +9,7 @@
 ```bash
 # 前提条件
 java -version    # 需要 JDK 17 或 21
-mvn -version     # 需要 Maven 3.9+
+mvn -version     # 需要 Maven 3.8.7+
 
 # 克隆仓库
 git clone https://github.com/gavinWithGu/UOK.git

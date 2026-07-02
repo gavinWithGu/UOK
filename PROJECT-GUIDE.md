@@ -22,7 +22,7 @@
 | 组件 | 版本 |
 |---|---|
 | Java | 17 / 21 双版本兼容 |
-| Maven | 3.9+ |
+| Maven | 3.8.7+ |
 | OpenTelemetry SDK | 1.32.0 |
 | Spring Boot | 3.2.5 |
 | JUnit 5 | 5.10.2 |
@@ -363,9 +363,9 @@ UOK/
 ### 7.1 环境准备
 
 ```bash
-# 安装 JDK 17 + Maven 3.9+ + Git
+# 安装 JDK 17 + Maven 3.8.7+ + Git
 java -version    # 17.x
-mvn -version     # 3.9+
+mvn -version     # 3.8.7++
 ```
 
 ### 7.2 克隆源码
