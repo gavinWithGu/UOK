@@ -287,6 +287,23 @@ filebeat test config && filebeat test output
 | [项目全景](PROJECT-GUIDE.md) | 单文件项目全貌（供 Agent 阅读） |
 | [设计文档](docs/PRD.md) | PRD / HLD / LLD |
 
+### 📖 新人推荐阅读顺序
+
+| 顺序 | 文档 | 目的 |
+|---|---|---|
+| 1 | [README.md](README.md) | 建立全局印象：项目是什么、能做什么、技术栈与模块结构 |
+| 2 | [Unified Observability Kit(UOK)_Design.md](Unified%20Observability%20Kit(UOK)_Design.md) | 理解设计思路：PRD+HLD+LLD 合并版，需求来源、分层架构、模块设计一文档读完 |
+| 3 | [PROJECT-GUIDE.md](PROJECT-GUIDE.md) | 项目全景：四阶段开发过程、完整文件目录、编码约定、验收标准达成 |
+| 4 | [development-phases.md](docs/development-phases.md) | 开发执行记录：每阶段的目标、交付、设计决策、覆盖率变化 |
+| 5 | [SETUP-GUIDE.md](SETUP-GUIDE.md) | **动手验证（核心）**：从零克隆源码、环境准备、一键构建、分阶段测试、覆盖率与 JMH 基准 |
+| 6 | [quickstart.md](docs/quickstart.md) | 接入使用：Agent 一行启动 / Lambda 三行代码 |
+| 7 | [integration-guide.md](docs/integration-guide.md) | 深入配置：采样/灰度/降级/脱敏完整参数 |
+| 8 | [operations-runbook.md](docs/operations-runbook.md) | 运维保障：监控指标、排错表、性能调优、紧急处理 |
+
+> **快速路径**：如果只想验证项目能否正常构建，直接看 [SETUP-GUIDE.md](SETUP-GUIDE.md)。
+>
+> **深入路径**：想了解某个阶段的交付细节，阅读 [docs/phase{1-4}-delivery-summary.md](docs/phase1-delivery-summary.md)。
+
 ---
 
 ## License
